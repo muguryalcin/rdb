@@ -1,4 +1,4 @@
-use std::io;
+use std::io::{self, Write};
 
 enum MetaCommands {
     Exit,
@@ -46,7 +46,7 @@ fn execute_command(statement: &Statement) {
         Commands::Select => {
             println!("Select")
         }
-        _ => println!("db > Unrecognized Command Error."),
+        _ => println!("Unrecognized Command Error."),
     }
 }
 fn main() {
@@ -55,24 +55,26 @@ fn main() {
             statement_type: Commands::Unrecognized,
         };
         let mut input = String::new();
+
+        print!("db > ");
+        io::stdout().flush().unwrap();
         io::stdin()
             .read_line(&mut input)
             .expect("Failed to read the command.");
         input = input.trim().to_lowercase().to_string();
         if input.is_empty() {
-            print!("db > ");
             println!("Please enter non-empty commands.");
             continue;
         } else if input.chars().nth(0) == Some('.') {
             match parse_meta_command(&input) {
                 MetaCommands::Exit => break,
-                MetaCommands::Other => println!("db > {} is not a valid meta command.", input),
+                MetaCommands::Other => println!("{} is not a valid meta command.", input),
             }
         } else {
             match parse_command(&input, &mut statement) {
                 CommandsSuccess::Success => execute_command(&statement),
                 CommandsSuccess::Unrecognized => {
-                    println!("db > Unrecognized command {}", input);
+                    println!("Unrecognized command {}", input);
                     continue;
                 }
             }
